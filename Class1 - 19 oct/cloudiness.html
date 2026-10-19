@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud Computing Basics & Evolution</title>
+<style>
+:root{
+  --bg:#0b1020; --bg2:#121a33; --card:#16203f; --line:#25325c;
+  --text:#e8ecff; --mute:#9aa6d1; --acc:#4cc9f0; --acc2:#7c5cff; --ok:#3ddc97; --warn:#ffb84d; --bad:#ff5d73;
+  --radius:16px;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){--bg:#f4f6ff;--bg2:#e9edff;--card:#fff;--line:#d5dcf5;--text:#13183a;--mute:#56608a;--acc:#0a84c1;--acc2:#5b3fe0}
+}
+:root[data-theme="light"]{--bg:#f4f6ff;--bg2:#e9edff;--card:#fff;--line:#d5dcf5;--text:#13183a;--mute:#56608a;--acc:#0a84c1;--acc2:#5b3fe0}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.65 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-x:hidden}
+h1,h2,h3{line-height:1.2;margin:0 0 .5em}
+h2{font-size:clamp(1.6rem,3.4vw,2.3rem)}
+h3{font-size:1.15rem}
+p{margin:0 0 1em;color:var(--mute)}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+section{padding:84px 0;position:relative}
+section:nth-of-type(even){background:var(--bg2)}
+.tag{display:inline-block;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase;color:var(--acc);font-weight:700;margin-bottom:10px}
+.grad{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.grid{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.g3{grid-template-columns:repeat(auto-fit,minmax(210px,1fr))}
+button{font:inherit;cursor:pointer;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 16px;transition:.2s}
+button:hover{border-color:var(--acc)}
+button.on{background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff;border-color:transparent}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;background:rgba(76,201,240,.14);color:var(--acc);font-size:.8rem;margin:2px}
+
+/* progress + nav */
+#bar{position:fixed;top:0;left:0;height:3px;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));z-index:60}
+nav{position:fixed;top:3px;left:0;right:0;z-index:50;backdrop-filter:blur(12px);background:color-mix(in srgb,var(--bg) 78%,transparent);border-bottom:1px solid var(--line)}
+nav .wrap{display:flex;gap:4px;overflow-x:auto;padding:8px 16px;scrollbar-width:none}
+nav a{color:var(--mute);text-decoration:none;font-size:.85rem;padding:4px 12px;border-radius:999px;white-space:nowrap}
+nav a.act,nav a:hover{color:var(--text);background:var(--card)}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s ease}
+.rv.in{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.2s}.d3{transition-delay:.3s}.d4{transition-delay:.4s}
+
+/* hero */
+#hero{min-height:100vh;display:flex;align-items:center;text-align:center;padding-top:110px;overflow:hidden;background:radial-gradient(1200px 600px at 50% 0,rgba(124,92,255,.25),transparent 60%),var(--bg)}
+#hero h1{font-size:clamp(2.2rem,6vw,4.2rem);margin-bottom:.3em}
+#hero p{font-size:1.15rem;max-width:620px;margin:0 auto 1.4em}
+.cloud{position:absolute;opacity:.12;animation:drift linear infinite;font-size:120px;user-select:none;pointer-events:none}
+@keyframes drift{from{transform:translateX(-20vw)}to{transform:translateX(120vw)}}
+.cta{display:inline-block;padding:12px 28px;border-radius:999px;background:linear-gradient(90deg,var(--acc),var(--acc2));color:#fff;text-decoration:none;font-weight:700;animation:pulse 2.4s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(76,201,240,.5)}70%{box-shadow:0 0 0 18px rgba(76,201,240,0)}100%{box-shadow:0 0 0 0 rgba(76,201,240,0)}}
+.float{display:inline-block;animation:fl 4s ease-in-out infinite}
+@keyframes fl{50%{transform:translateY(-12px)}}
+
+/* topics */
+.topic{display:flex;gap:12px;align-items:center;text-decoration:none;color:var(--text);transition:.25s}
+.topic:hover{transform:translateY(-4px);border-color:var(--acc)}
+.topic b{font-size:1.4rem;width:40px;height:40px;display:grid;place-items:center;border-radius:12px;background:rgba(124,92,255,.18);color:var(--acc);flex:none;font-size:1rem}
+
+/* timeline */
+.tl{position:relative;padding-left:28px;border-left:2px solid var(--line);margin-top:20px}
+.tl .it{position:relative;margin-bottom:22px}
+.tl .it:before{content:"";position:absolute;left:-37px;top:6px;width:14px;height:14px;border-radius:50%;background:var(--acc);box-shadow:0 0 0 4px var(--bg2)}
+.tl b{color:var(--acc)}
+
+/* VM */
+.stack{display:flex;flex-direction:column;gap:6px;max-width:420px;margin:0 auto}
+.layer{padding:10px;border-radius:10px;text-align:center;font-weight:600;border:1px solid var(--line);background:var(--card);transition:.4s}
+.vms{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.vm{padding:12px 4px;border-radius:10px;background:rgba(61,220,151,.15);border:1px solid var(--ok);text-align:center;font-size:.85rem;animation:pop .5s both}
+@keyframes pop{from{transform:scale(.4);opacity:0}}
+.hyp{background:linear-gradient(90deg,var(--acc2),var(--acc));color:#fff}
+
+/* capex */
+.chart{display:flex;align-items:flex-end;gap:6px;height:200px;border-bottom:2px solid var(--line);padding:0 4px}
+.chart i{flex:1;border-radius:6px 6px 0 0;transition:height .7s cubic-bezier(.2,.8,.2,1);min-height:2px}
+.legend{display:flex;gap:16px;font-size:.85rem;color:var(--mute);margin-top:8px;flex-wrap:wrap}
+.legend span:before{content:"";display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;background:var(--c)}
+
+/* infra */
+.infra{display:grid;gap:12px}
+.region{border:2px dashed var(--acc);border-radius:18px;padding:14px;position:relative;transition:.4s}
+.region>label{position:absolute;top:-12px;left:16px;background:var(--bg2);padding:0 8px;color:var(--acc);font-weight:700;font-size:.85rem}
+.azs{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.az{border:2px solid var(--ok);border-radius:12px;padding:10px;text-align:center;font-size:.85rem;transition:.4s;cursor:pointer;background:rgba(61,220,151,.07)}
+.az .dcs{display:flex;gap:6px;justify-content:center;margin-top:6px}
+.az .dcs i{width:22px;height:30px;border-radius:4px;background:var(--ok);animation:blink 2s infinite}
+.az .dcs i:nth-child(2){animation-delay:.6s}
+@keyframes blink{50%{opacity:.45}}
+.down{border-color:var(--bad)!important;background:rgba(255,93,115,.1)!important;filter:grayscale(.6)}
+.down .dcs i{background:var(--bad);animation:none}
+.status{padding:10px 14px;border-radius:10px;font-weight:600;margin-top:10px;background:rgba(61,220,151,.14);color:var(--ok);transition:.3s}
+.status.bad{background:rgba(255,93,115,.14);color:var(--bad)}
+
+/* CDN */
+.map{position:relative;height:300px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line);overflow:hidden}
+.node{position:absolute;transform:translate(-50%,-50%);text-align:center;font-size:.72rem;color:var(--mute);transition:.3s}
+.node em{display:grid;place-items:center;font-style:normal;width:42px;height:42px;border-radius:50%;margin:0 auto 2px;font-size:1.2rem;background:var(--bg2);border:2px solid var(--line)}
+.node.hot em{border-color:var(--acc);box-shadow:0 0 18px var(--acc)}
+.packet{position:absolute;width:12px;height:12px;border-radius:50%;background:var(--warn);box-shadow:0 0 12px var(--warn);transform:translate(-50%,-50%);transition:left .9s linear,top .9s linear;z-index:3}
+svg.lines{position:absolute;inset:0;width:100%;height:100%}
+.hit{font-size:.85rem;margin-top:10px;min-height:1.6em}
+
+/* service models */
+.layers{display:grid;gap:4px;max-width:520px}
+.sl{display:flex;justify-content:space-between;padding:9px 14px;border-radius:8px;font-size:.9rem;transition:.5s;border:1px solid var(--line)}
+.sl.you{background:rgba(124,92,255,.25);border-color:var(--acc2)}
+.sl.prov{background:rgba(76,201,240,.12);opacity:.75}
+
+/* steps */
+.steps{counter-reset:s;display:grid;gap:8px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);cursor:pointer;transition:.3s}
+.step:before{counter-increment:s;content:counter(s);flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--line);font-weight:700;font-size:.85rem}
+.step.done{border-color:var(--ok)}
+.step.done:before{content:"✓";background:var(--ok);color:#06210f}
+.step small{display:block;color:var(--mute)}
+.term{background:#05070f;color:#c9f7d0;border-radius:12px;padding:16px;font-size:.88rem;min-height:210px;overflow:auto;border:1px solid var(--line);white-space:pre-wrap}
+.term .p{color:#7cc7ff}
+.cur{display:inline-block;width:8px;height:1em;background:#c9f7d0;vertical-align:-2px;animation:blink 1s steps(2) infinite}
+
+/* careers */
+.role{transition:.3s}
+.role.hide{display:none}
+.role h3{margin-bottom:4px}
+.role p{margin:0;font-size:.9rem}
+
+/* quiz */
+.opt{display:block;width:100%;text-align:left;border-radius:12px;margin:6px 0}
+.opt.right{border-color:var(--ok);background:rgba(61,220,151,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(255,93,115,.15);animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.exp{display:none;font-size:.9rem;margin-top:8px}
+.exp.show{display:block;animation:pop .4s}
+
+/* flow */
+.flow{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;align-items:center}
+.flow span{padding:10px 16px;border-radius:12px;background:var(--card);border:1px solid var(--line);font-weight:600;opacity:0;transform:scale(.7);transition:.5s}
+.flow.in span{opacity:1;transform:none}
+.flow.in span:nth-child(2){transition-delay:.15s}.flow.in span:nth-child(3){transition-delay:.3s}.flow.in span:nth-child(5){transition-delay:.45s}.flow.in span:nth-child(7){transition-delay:.6s}.flow.in span:nth-child(9){transition-delay:.75s}
+.flow i{font-style:normal;color:var(--acc)}
+.theme{position:fixed;right:14px;bottom:14px;z-index:60;width:42px;height:42px;padding:0;border-radius:50%}
+footer{padding:40px 16px;text-align:center;color:var(--mute);font-size:.9rem}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.rv{opacity:1;transform:none}.flow span{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav><div class="wrap" id="nav"></div></nav>
+<button class="theme" id="theme" aria-label="Toggle theme">◐</button>
+
+<header id="hero">
+  <span class="cloud" style="top:12%;animation-duration:60s">☁</span>
+  <span class="cloud" style="top:55%;animation-duration:85s;animation-delay:-30s;font-size:180px">☁</span>
+  <span class="cloud" style="top:78%;animation-duration:70s;animation-delay:-50s;font-size:90px">☁</span>
+  <div class="wrap">
+    <div class="tag">Lecture 1</div>
+    <h1><span class="float">☁️</span> <span class="grad">Cloud Computing</span><br>Basics, Analogy &amp; Evolution</h1>
+    <p>From owning servers to renting a utility: virtualization, data centers, regions, edge, IaaS/PaaS/SaaS, a live EC2 lab and where cloud careers lead.</p>
+    <a class="cta" href="#topics">Start the journey ↓</a>
+  </div>
+</header>
+
+<section id="topics">
+  <div class="wrap">
+    <div class="tag">Agenda</div><h2 class="rv">What we will cover</h2>
+    <div class="grid g2" id="topicGrid"></div>
+  </div>
+</section>
+
+<section id="why">
+  <div class="wrap">
+    <div class="tag">Preface</div><h2 class="rv">Why learn cloud?</h2>
+    <p class="rv">Most technology-driven organizations expect engineers to understand cloud fundamentals. Modern applications are built, tested, deployed and scaled in the cloud. It is no longer optional; it is foundational.</p>
+    <div class="row rv" id="roles1"></div>
+  </div>
+</section>
+
+<section id="evolution">
+  <div class="wrap">
+    <div class="tag">Evolution</div><h2 class="rv">How a company operated 20 years ago</h2>
+    <p class="rv">Imagine an education platform in the early 2000s. Before serving a single student online it had to build its own infrastructure.</p>
+    <div class="grid g2">
+      <div class="card rv">
+        <h3>🏢 What is a data center?</h3>
+        <p>A physical facility housing the core computing infrastructure.</p>
+        <span class="pill">Servers</span><span class="pill">Storage</span><span class="pill">Routers · Switches · Firewalls</span><span class="pill">Power &amp; cooling</span>
+      </div>
+      <div class="card rv d1">
+        <h3>🔧 On-premise: you do it all</h3>
+        <p>Buy hardware, install OS, manage security, maintain power and cooling, handle failures and upgrades.</p>
+        <p style="color:var(--ok)">＋ Full control · compliance · custom hardware</p>
+        <p style="color:var(--bad)">－ High upfront cost · slow scaling · maintenance · slow innovation</p>
+      </div>
+    </div>
+    <div class="card rv" style="margin-top:16px">
+      <h3>📈 The capacity problem</h3>
+      <p>Drag the slider to change demand. Fixed on-premise capacity either crashes or wastes money. Cloud follows demand.</p>
+      <input type="range" id="demand" min="0" max="100" value="30" style="width:100%">
+      <div class="chart" id="capChart"></div>
+      <div class="legend"><span style="--c:var(--acc2)">Demand</span><span style="--c:var(--warn)">On-premise capacity (fixed: 6 servers)</span><span style="--c:var(--ok)">Cloud capacity (on demand)</span></div>
+      <div class="status" id="capStatus"></div>
+    </div>
+  </div>
+</section>
+
+<section id="virt">
+  <div class="wrap">
+    <div class="tag">Turning point</div><h2 class="rv">Virtualization</h2>
+    <p class="rv">Traditionally one physical server ran one application, so hardware sat underused. Virtualization lets multiple isolated virtual instances share one physical machine.</p>
+    <div class="grid g2">
+      <div class="card rv">
+        <div class="stack" id="vmStack"></div>
+        <div class="row" style="justify-content:center"><button id="addVm">＋ Add VM</button><button id="resetVm">Reset</button></div>
+      </div>
+      <div class="card rv d1">
+        <h3>Hypervisor</h3>
+        <p>Software that creates and manages VMs. Allocates CPU, memory and storage, isolates workloads, and manages communication between VMs and hardware.</p>
+        <h3>Virtual machine</h3>
+        <p>A software-based computer with its own OS, running independently while sharing the same physical hardware on top of a hypervisor.</p>
+        <p>Cloud providers carve powerful physical servers into many VMs, which is the technical foundation of cloud.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="cloud">
+  <div class="wrap">
+    <div class="tag">Introduction</div><h2 class="rv">Cloud = renting instead of owning</h2>
+    <p class="rv">Servers, storage, databases, networking and software platforms, provisioned on demand, paid only for what you use. Like drawing electricity from a grid instead of running a private generator.</p>
+    <div class="grid g2">
+      <div class="card rv"><h3>Then</h3><p>Buy hardware → install OS → maintain and upgrade everything manually.</p></div>
+      <div class="card rv d1"><h3>Now</h3><p>Provision in minutes → provider handles maintenance → teams focus on apps and users.</p></div>
+    </div>
+    <h3 class="rv" style="margin-top:28px">Birth of public cloud</h3>
+    <div class="tl">
+      <div class="it rv"><b>2006</b> AWS launches. Pay-as-you-go, self-service, global infrastructure.</div>
+      <div class="it rv"><b>2008</b> Google announces App Engine; Compute Engine follows in late 2013.</div>
+      <div class="it rv"><b>2010</b> "Windows Azure" released; rebranded Microsoft Azure in 2014.</div>
+    </div>
+    <div class="grid g3">
+      <div class="card rv"><h3>AWS</h3><p>Early-mover advantage, 200+ services, strong global infrastructure.</p></div>
+      <div class="card rv d1"><h3>Azure</h3><p>Enterprise ecosystem (Office 365, Windows, LinkedIn) and hybrid tools like Azure Arc.</p></div>
+      <div class="card rv d2"><h3>GCP</h3><p>Strength in data analytics, ML and AI; trails in enterprise but growing fast.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="cost">
+  <div class="wrap">
+    <div class="tag">Cost model</div><h2 class="rv">CAPEX vs OPEX</h2>
+    <div class="grid g2">
+      <div class="card rv">
+        <h3>Pick a model</h3>
+        <div class="row"><button class="on" data-m="capex">CAPEX: on-premise</button><button data-m="opex">OPEX: cloud</button></div>
+        <div class="chart" id="costChart" style="height:180px"></div>
+        <p id="costTxt" style="margin-top:10px"></p>
+      </div>
+      <div class="card rv d1">
+        <h3>Why startups pick cloud</h3>
+        <p>Quick scaling without a large upfront investment.</p>
+        <p><b style="color:var(--text)">Cloud converts CAPEX (buying servers upfront) into OPEX (pay as you use).</b></p>
+        <p>Cloud does not mean zero downtime, free resources or no admins.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="deploy">
+  <div class="wrap">
+    <div class="tag">Deployment models</div><h2 class="rv">Public, Private &amp; Hybrid</h2>
+    <div class="row rv" id="depTabs"></div>
+    <div class="card rv" id="depCard"></div>
+  </div>
+</section>
+
+<section id="infra">
+  <div class="wrap">
+    <div class="tag">AWS global infrastructure</div><h2 class="rv">Building a nationwide streaming platform</h2>
+    <p class="rv">Millions of users, traffic spikes during live events, zero downtime and low latency across India. We design the infrastructure step by step.</p>
+    <div class="grid g2">
+      <div class="card rv">
+        <h3>Explorer: break things</h3>
+        <p>Click an Availability Zone to fail it. Use the buttons to fail a whole region.</p>
+        <div class="infra" id="infraBox"></div>
+        <div class="row"><button id="failRegion">Fail Mumbai region</button><button id="healAll">Heal everything</button></div>
+        <div class="status" id="infraStatus"></div>
+      </div>
+      <div class="card rv d1" id="infraSteps"></div>
+    </div>
+    <h3 class="rv" style="margin-top:28px">Choosing a Region</h3>
+    <div class="grid g3">
+      <div class="card rv"><h3>⚡ Latency</h3><p>Closer to users means faster.</p></div>
+      <div class="card rv d1"><h3>⚖️ Compliance</h3><p>Data residency laws. Indian banking apps use ap-south-1, not us-east-1.</p></div>
+      <div class="card rv d2"><h3>💰 Cost</h3><p>Pricing varies by region.</p></div>
+      <div class="card rv d3"><h3>🧩 Services</h3><p>New services launch in major regions first.</p></div>
+    </div>
+    <div class="grid g3" style="margin-top:20px" id="nums"></div>
+  </div>
+</section>
+
+<section id="edge">
+  <div class="wrap">
+    <div class="tag">Edge &amp; CDN</div><h2 class="rv">Why is video still slow for some users?</h2>
+    <p class="rv">A CDN caches copies of images, videos and static files in edge locations so content is served from the nearest one (Amazon CloudFront on AWS). Click a city to watch a request travel.</p>
+    <div class="map rv" id="map">
+      <svg class="lines" id="lines"></svg>
+    </div>
+    <div class="row"><button data-c="blr">📍 Bangalore</button><button data-c="del">📍 Delhi</button><button data-c="chn">📍 Chennai</button><button id="flush">🧹 Clear edge cache</button></div>
+    <div class="status hit" id="hit">Pick a city. The first request misses the cache and travels to the Mumbai region; the next is served from the edge.</div>
+    <p class="rv" style="margin-top:14px"><b style="color:var(--text)">Edge locations ≠ Regions ≠ Availability Zones.</b></p>
+    <h2 class="rv" style="margin-top:50px">Edge computing</h2>
+    <p class="rv">Processing data close to where it is generated instead of sending everything to a far-away cloud data center. Use it when speed matters, decisions must be instant, or bandwidth is limited.</p>
+    <div class="grid g2">
+      <div class="card rv"><h3>🚗 Autonomous vehicles</h3><p>Cars must react in milliseconds. Decisions are made inside the vehicle.</p><div class="status" style="margin:0" id="carS">Edge: ~2 ms</div><div class="row"><button id="carCloud">Send to cloud instead</button></div></div>
+      <div class="card rv d1"><h3>🏭 Factory IoT sensors</h3><p>Sensors detect temperature or pressure; immediate alerts prevent damage by processing in the factory network. Less latency, less bandwidth.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="models">
+  <div class="wrap">
+    <div class="tag">Service models</div><h2 class="rv">IaaS, PaaS &amp; SaaS</h2>
+    <p class="rv">How much do you want to manage yourself? Switch models to see who owns each layer.</p>
+    <div class="grid g2">
+      <div class="card rv">
+        <div class="row" id="svcTabs"></div>
+        <div class="layers" id="layers"></div>
+        <div class="row" style="font-size:.8rem"><span class="pill" style="background:rgba(124,92,255,.25);color:var(--text)">You manage</span><span class="pill">Provider manages</span></div>
+      </div>
+      <div class="card rv d1" id="svcInfo"></div>
+    </div>
+  </div>
+</section>
+
+<section id="lab">
+  <div class="wrap">
+    <div class="tag">Hands-on</div><h2 class="rv">Launching an EC2 instance (Linux)</h2>
+    <p class="rv">Click each step to check it off. This instance is reused for the storage, networking and access labs.</p>
+    <div class="steps" id="ec2Steps"></div>
+    <div class="status" id="ec2Prog" style="margin-top:12px"></div>
+
+    <h3 class="rv" style="margin-top:34px">Ways to connect</h3>
+    <div class="grid g3">
+      <div class="card rv"><h3>1. SSH client</h3><p>Public IP + key pair, port 22 open.</p><p style="color:var(--ok)">Simple, familiar</p><p style="color:var(--bad)">Manual keys, poor auditing</p></div>
+      <div class="card rv d1"><h3>2. EC2 Instance Connect</h3><p>AWS injects a temporary key, access via IAM, supported Amazon Linux-based OSes.</p><p style="color:var(--ok)">No long-lived keys</p></div>
+      <div class="card rv d2"><h3>3. Session Manager</h3><p>No SSH, no inbound ports, no public IP. Needs SSM Agent, IAM role, outbound access or VPC endpoint.</p><p style="color:var(--ok)">Fully audited, enterprise standard</p></div>
+    </div>
+
+    <h3 class="rv" style="margin-top:34px">SSH + SCP walkthrough</h3>
+    <div class="row"><button id="runTerm" class="on">▶ Replay</button></div>
+    <div class="term" id="term"></div>
+  </div>
+</section>
+
+<section id="careers">
+  <div class="wrap">
+    <div class="tag">Careers</div><h2 class="rv">Where cloud can take you</h2>
+    <div class="row" id="roleTabs"></div>
+    <div class="grid g3" id="roleGrid"></div>
+    <div class="grid g2" style="margin-top:24px">
+      <div class="card rv"><h3>📊 Market trends (2026)</h3><p>Multi-cloud and hybrid are common · GenAI infrastructure surge · FinOps is mandatory · choices driven by compliance, ecosystem and cost · global spending keeps growing.</p></div>
+      <div class="card rv d1"><h3>🎓 Certifications</h3><p>AWS, Azure and Google Cloud, at Foundational, Associate, Professional and Specialty levels. Certifications validate skills, but hands-on experience matters more.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="quiz">
+  <div class="wrap">
+    <div class="tag">Check yourself</div><h2 class="rv">Practice MCQs</h2>
+    <div class="grid" id="quizBox"></div>
+    <div class="status" id="score" style="margin-top:14px"></div>
+  </div>
+</section>
+
+<section id="wrapup">
+  <div class="wrap" style="text-align:center">
+    <div class="tag">Conclusion</div><h2 class="rv">From ownership to utility</h2>
+    <div class="flow" id="finalFlow"><span>Data Centers</span><i>→</i><span>Availability Zones</span><i>→</i><span>Regions</span><i>→</i><span>CDN</span><i>→</i><span>Edge</span></div>
+    <p class="rv" style="margin-top:24px;font-size:1.1rem;max-width:640px;margin-inline:auto">Instead of buying and managing hardware, companies provision resources instantly and scale as needed. This foundation prepares you for everything that follows in cloud engineering.</p>
+  </div>
+</section>
+<footer>Lecture 1 · Cloud Computing Basics &amp; Evolution</footer>
+
+<script>
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* theme */
+$('#theme').onclick=()=>{
+  const d=document.documentElement, cur=d.dataset.theme||(matchMedia('(prefers-color-scheme: light)').matches?'light':'dark');
+  d.dataset.theme=cur==='light'?'dark':'light';
+};
+
+/* nav + topics */
+const secs=[['topics','Agenda'],['why','Why cloud'],['evolution','Evolution'],['virt','Virtualization'],['cloud','Cloud'],['cost','CAPEX/OPEX'],['deploy','Deployment'],['infra','Infrastructure'],['edge','Edge &amp; CDN'],['models','IaaS/PaaS/SaaS'],['lab','EC2 lab'],['careers','Careers'],['quiz','Quiz']];
+$('#nav').innerHTML=secs.map(([id,t])=>`<a href="#${id}">${t}</a>`).join('');
+const topics=['Evolution from on-premise to cloud','Fundamentals of cloud computing','Virtualization, hypervisors &amp; VMs','CAPEX vs OPEX cost model','Deployment models: public, private, hybrid','AWS infrastructure: data centers, regions, AZs','Edge computing &amp; CDN basics','Service models: IaaS, PaaS, SaaS','Launching &amp; connecting to an EC2 instance','Overview of cloud career paths'];
+const targets=['evolution','cloud','virt','cost','deploy','infra','edge','models','lab','careers'];
+$('#topicGrid').innerHTML=topics.map((t,i)=>`<a class="card topic rv d${i%4}" href="#${targets[i]}"><b>${i+1}</b><span>${t}</span></a>`).join('');
+$('#roles1').innerHTML=['Software Developer','System Administrator','DevOps Engineer','Security Analyst','Data Engineer'].map(r=>`<span class="pill">${r}</span>`).join('');
+
+/* scroll progress, active nav, reveal */
+const links=$$('#nav a');
+addEventListener('scroll',()=>{
+  const h=document.documentElement;
+  $('#bar').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+  let cur='';secs.forEach(([id])=>{const e=document.getElementById(id);if(e&&e.getBoundingClientRect().top<160)cur=id});
+  links.forEach(a=>a.classList.toggle('act',a.getAttribute('href')==='#'+cur));
+},{passive:true});
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.12});
+function observe(){$$('.rv:not(.in),.flow').forEach(e=>io.observe(e))}
+observe();
+
+/* demand chart */
+const cap=$('#capChart');
+const hours=Array.from({length:14},(_,i)=>i);
+cap.innerHTML=hours.map(()=>`<i style="background:var(--acc2)"></i>`).join('');
+function drawCap(){
+  const k=+$('#demand').value/100;
+  const bars=$$('i',cap);let crash=0,waste=0;
+  bars.forEach((b,i)=>{
+    const wave=.35+.65*Math.abs(Math.sin(i/2.2));
+    const dem=Math.min(10,Math.round((1+9*k)*wave*10)/10);
+    b.style.height=(dem/10*100)+'%';
+    if(dem>6)crash++; if(dem<3)waste++;
+  });
+  const st=$('#capStatus');
+  st.classList.toggle('bad',crash>0);
+  st.textContent=crash>0?`⚠ On-premise: ${crash} peak periods exceed 6 servers, so the site crashes. Cloud scales out automatically.`:waste>3?'💸 On-premise: you pay for 6 servers while only a few are needed. Cloud shrinks and you pay less.':'✓ Demand fits capacity, but only until the next spike.';
+}
+$('#demand').oninput=drawCap;drawCap();
+
+/* VM stack */
+let vmN=0;
+function drawStack(){
+  $('#vmStack').innerHTML=`<div class="vms">${Array.from({length:vmN},(_,i)=>`<div class="vm">VM ${i+1}<br><small>OS + app</small></div>`).join('')||'<div style="grid-column:1/-1;text-align:center;color:var(--mute);padding:12px">One server, one app: mostly idle</div>'}</div>
+  <div class="layer hyp">Hypervisor</div><div class="layer">Physical server (CPU · RAM · storage)</div>
+  <div style="text-align:center;font-size:.85rem;color:var(--mute)">Utilization ≈ ${Math.min(95,vmN?25+vmN*12:15)}%</div>`;
+}
+$('#addVm').onclick=()=>{vmN=Math.min(vmN+1,6);drawStack()};
+$('#resetVm').onclick=()=>{vmN=0;drawStack()};
+drawStack();setTimeout(()=>{if(!vmN){vmN=1;drawStack()}},800);
+
+/* cost */
+const costM={
+ capex:{c:'var(--warn)',v:[100,5,5,5,5,5,5,5,5,5,5,5],t:'CAPEX: a large upfront purchase of servers, with long setup and capacity predicted months ahead.'},
+ opex:{c:'var(--ok)',v:[10,14,20,18,26,35,30,42,55,48,62,70],t:'OPEX: pay-as-you-go, with cost following real usage and no big upfront bill.'}
+};
+function drawCost(m){
+  const {c,v,t}=costM[m];$('#costTxt').textContent=t;
+  const ch=$('#costChart');
+  if(!ch.children.length)ch.innerHTML=v.map(()=>`<i></i>`).join('');
+  $$('i',ch).forEach((b,i)=>{b.style.background=c;b.style.height=v[i]+'%'});
+}
+$$('#cost [data-m]').forEach(b=>b.onclick=()=>{$$('#cost [data-m]').forEach(x=>x.classList.toggle('on',x===b));drawCost(b.dataset.m)});
+drawCost('capex');setTimeout(()=>drawCost('capex'),50);
+
+/* deployment */
+const dep={
+ Public:{i:'🌐',p:['Owned and managed by the provider, shared across customers (multi-tenancy)','Pay-as-you-go, highly scalable, global','Examples: AWS, Azure, GCP'],u:'Startups, digital platforms, fast growth'},
+ Private:{i:'🔒',p:['Dedicated to a single organization','On-premise or a dedicated provider-managed environment','Greater security control, higher cost'],u:'Finance, healthcare, government (strict compliance and data residency)'},
+ Hybrid:{i:'🔀',p:['Sensitive or regulated workloads stay private','Scalable or less sensitive workloads run in public cloud','Flexibility with control where required'],u:'Keep sensitive data on-premise but use cloud for scalability'}
+};
+$('#depTabs').innerHTML=Object.keys(dep).map((k,i)=>`<button class="${i?'':'on'}">${dep[k].i} ${k}</button>`).join('');
+function showDep(k){const d=dep[k];$('#depCard').innerHTML=`<h3>${d.i} ${k} cloud</h3><ul style="color:var(--mute);padding-left:20px">${d.p.map(x=>`<li>${x}</li>`).join('')}</ul><p><b style="color:var(--text)">Best for:</b> ${d.u}</p>`;$('#depCard').style.animation='none';$('#depCard').offsetHeight;$('#depCard').style.animation='pop .4s'}
+$$('#depTabs button').forEach((b,i)=>b.onclick=()=>{$$('#depTabs button').forEach(x=>x.classList.toggle('on',x===b));showDep(Object.keys(dep)[i])});
+showDep('Public');
+
+/* infra explorer */
+function mkRegion(id,name,azs){return `<div class="region" id="${id}"><label>${name}</label><div class="azs">${azs.map(a=>`<div class="az" data-az><b>${a}</b><div class="dcs"><i></i><i></i><i></i></div></div>`).join('')}</div></div>`}
+$('#infraBox').innerHTML=mkRegion('r1','Mumbai · ap-south-1 (primary)',['ap-south-1a','ap-south-1b','ap-south-1c'])+mkRegion('r2','Singapore · ap-southeast-1 (backup)',['ap-southeast-1a','ap-southeast-1b']);
+function infraStatus(){
+  const r1=$$('#r1 .az'), r2=$$('#r2 .az');
+  const up1=r1.filter(a=>!a.classList.contains('down')).length, up2=r2.filter(a=>!a.classList.contains('down')).length;
+  const s=$('#infraStatus');let msg,bad=false;
+  $('#r1').classList.toggle('down',up1===0);
+  if(up1===r1.length&&up2===r2.length)msg='✓ All healthy. Traffic served from Mumbai.';
+  else if(up1>0){msg=`✓ ${up1}/${r1.length} AZs up in Mumbai, so users see no interruption (high availability).`}
+  else if(up2>0){msg='⚠ Mumbai region is down, so traffic shifts to the Singapore backup (multi-region disaster recovery).'}
+  else{msg='✖ Everything is down. Redundancy matters!';bad=true}
+  s.textContent=msg;s.classList.toggle('bad',bad||up1===0);
+}
+$$('[data-az]').forEach(a=>a.onclick=()=>{a.classList.toggle('down');infraStatus()});
+$('#failRegion').onclick=()=>{$$('#r1 .az').forEach(a=>a.classList.add('down'));infraStatus()};
+$('#healAll').onclick=()=>{$$('.az').forEach(a=>a.classList.remove('down'));infraStatus()};
+infraStatus();
+$('#infraSteps').innerHTML=`<h3>The design, step by step</h3><div class="steps" style="gap:6px">
+<div class="step" style="cursor:default"><div><b>Data center</b><small>Servers, storage, network, power and cooling. A single building is a single point of failure.</small></div></div>
+<div class="step" style="cursor:default"><div><b>Availability Zone</b><small>One or more data centers with independent power, cooling and networking, linked by private fiber. Deploy across multiple AZs.</small></div></div>
+<div class="step" style="cursor:default"><div><b>Region</b><small>A geographic area with multiple AZs, such as ap-south-1 (Mumbai) or us-east-1 (Virginia).</small></div></div>
+<div class="step" style="cursor:default"><div><b>Disaster recovery</b><small>Primary: Mumbai. Backup: Singapore (ap-southeast-1). This is multi-region.</small></div></div>
+<div class="step" style="cursor:default"><div><b>Edge locations</b><small>CDN caches content near users for lower latency.</small></div></div></div>`;
+
+/* numbers */
+const nums=[['240+','AWS services',240],['39','Regions',39],['123','Availability Zones',123],['750+','Edge locations / PoPs',750]];
+$('#nums').innerHTML=nums.map(n=>`<div class="card rv" style="text-align:center"><div class="grad" style="font-size:2.2rem;font-weight:800" data-n="${n[2]}" data-s="${n[0].includes('+')?'+':''}">0</div><p style="margin:0">${n[1]}</p></div>`).join('');
+const nio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;nio.unobserve(e.target);const el=e.target,end=+el.dataset.n,t0=performance.now();
+  (function f(t){const p=Math.min(1,(t-t0)/1200);el.textContent=Math.round(end*(1-Math.pow(1-p,3)))+el.dataset.s;if(p<1)requestAnimationFrame(f)})(t0)}),{threshold:.6});
+$$('[data-n]').forEach(e=>nio.observe(e));
+observe();
+
+/* CDN map */
+const pts={mum:[50,18,'🏛️','Region<br>Mumbai'],blr:[48,72,'📍','Bangalore'],del:[40,50,'📍','Delhi'],chn:[78,76,'📍','Chennai']};
+const edges={blr:[30,80],del:[22,30],chn:[88,60]};
+const map=$('#map');
+const cities={blr:{n:'Bangalore',u:[48,86],e:[48,64]},del:{n:'Delhi',u:[18,52],e:[18,34]},chn:{n:'Chennai',u:[82,84],e:[82,62]}};
+map.insertAdjacentHTML('beforeend',`<div class="node" style="left:50%;top:16%"><em>🏛️</em>Origin: Mumbai<br>ap-south-1</div>`+Object.entries(cities).map(([k,c])=>`<div class="node" id="u-${k}" style="left:${c.u[0]}%;top:${c.u[1]}%"><em>👤</em>${c.n} user</div><div class="node" id="e-${k}" style="left:${c.e[0]}%;top:${c.e[1]}%"><em>📡</em>Edge ${c.n}</div>`).join(''));
+const cached=new Set();
+function line(a,b){const A=$(a).getBoundingClientRect(),B=$(b).getBoundingClientRect(),M=map.getBoundingClientRect();return `<line x1="${A.left+A.width/2-M.left}" y1="${A.top+A.height/2-M.top}" x2="${B.left+B.width/2-M.left}" y2="${B.top+B.height/2-M.top}" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 5"/>`}
+function drawLines(){$('#lines').innerHTML=Object.keys(cities).map(k=>line('#u-'+k,'#e-'+k)+line('#e-'+k,'.node:nth-of-type(1)')).join('')}
+const orig=()=>map.querySelector('.node');
+function drawLines2(){const o=orig();const M=map.getBoundingClientRect();const O=o.getBoundingClientRect();
+  $('#lines').innerHTML=Object.keys(cities).map(k=>{const u=$('#u-'+k).getBoundingClientRect(),e=$('#e-'+k).getBoundingClientRect();
+   const f=(r)=>[r.left+r.width/2-M.left,r.top+r.height/2-M.top];const [ux,uy]=f(u),[ex,ey]=f(e),[ox,oy]=f(O);
+   return `<line x1="${ux}" y1="${uy}" x2="${ex}" y2="${ey}" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 5"/><line x1="${ex}" y1="${ey}" x2="${ox}" y2="${oy}" stroke="var(--line)" stroke-width="2" stroke-dasharray="5 5"/>`}).join('')}
+addEventListener('resize',drawLines2);setTimeout(drawLines2,100);
+function pos(sel){const M=map.getBoundingClientRect(),r=$(sel).getBoundingClientRect();return [r.left+r.width/2-M.left,r.top+r.height/2-M.top]}
+function move(p,[x,y]){return new Promise(r=>{p.style.left=x+'px';p.style.top=y+'px';setTimeout(r,reduce?10:950)})}
+let busy=false;
+async function request(k){
+  if(busy)return;busy=true;drawLines2();
+  const p=document.createElement('div');p.className='packet';map.appendChild(p);
+  const u=pos('#u-'+k),e=pos('#e-'+k),o=pos('.node');
+  p.style.left=u[0]+'px';p.style.top=u[1]+'px';await new Promise(r=>setTimeout(r,50));
+  $('#e-'+k).classList.add('hot');
+  await move(p,e);
+  const h=$('#hit');
+  if(cached.has(k)){h.classList.remove('bad');h.textContent=`⚡ Cache HIT: video served straight from the ${cities[k].n} edge (low latency, origin untouched).`;await move(p,u)}
+  else{h.classList.add('bad');h.textContent='🐢 Cache MISS: fetching from the Mumbai origin, then caching a copy at the edge…';await move(p,o);p.style.background='var(--ok)';await move(p,e);cached.add(k);$('#e-'+k).querySelector('em').textContent='💾';await move(p,u);h.classList.remove('bad');h.textContent=`✓ Delivered and cached in ${cities[k].n}. Request again for a cache hit.`}
+  p.remove();$('#e-'+k).classList.remove('hot');busy=false;
+}
+$$('[data-c]').forEach(b=>b.onclick=()=>request(b.dataset.c));
+$('#flush').onclick=()=>{cached.clear();$$('[id^=e-] em').forEach(e=>e.textContent='📡');$('#hit').textContent='Edge caches cleared.'};
+
+/* edge car */
+$('#carCloud').onclick=function(){const s=$('#carS');const cloud=this.dataset.c!=='1';this.dataset.c=cloud?'1':'';s.classList.toggle('bad',cloud);s.textContent=cloud?'Cloud round trip: ~120 ms: too slow to brake!':'Edge: ~2 ms';this.textContent=cloud?'Process at the edge instead':'Send to cloud instead'};
+
+/* service models */
+const svc={
+ IaaS:{l:[1,1,1,1,0,0,0,0],d:'Provider manages data centers, servers, networking and virtualization. You manage OS, runtime, applications and security configuration.',e:'AWS EC2, Azure VMs, Google Compute Engine',u:'Maximum control and flexibility, but more operational effort. Use when you need customization.'},
+ PaaS:{l:[1,1,0,0,0,0,0,0],d:'Provider also manages the OS and runtime. You manage application code and business logic.',e:'AWS Elastic Beanstalk',u:'Build and deploy quickly without server management.'},
+ SaaS:{l:[0,0,0,0,0,0,0,0],d:'Provider manages everything. You just use the software.',e:'Google Workspace, Microsoft 365',u:'Ready-made solutions instead of building your own.'}
+};
+const layerN=['Application','Data / business logic','Runtime','Operating system','Virtualization','Servers','Storage &amp; networking','Physical data center'];
+// who manages: IaaS you=App,Data,Runtime,OS ; PaaS you=App,Data ; SaaS none
+const youMap={IaaS:4,PaaS:2,SaaS:0};
+$('#svcTabs').innerHTML=Object.keys(svc).map((k,i)=>`<button class="${i?'':'on'}">${k}</button>`).join('');
+function showSvc(k){const n=youMap[k];
+  $('#layers').innerHTML=layerN.map((x,i)=>`<div class="sl ${i<n?'you':'prov'}"><span>${x}</span><span>${i<n?'You':'Provider'}</span></div>`).join('');
+  const s=svc[k];$('#svcInfo').innerHTML=`<h3>${k}</h3><p>${s.d}</p><p><b style="color:var(--text)">Examples:</b> ${s.e}</p><p><b style="color:var(--text)">Use when:</b> ${s.u}</p>`;
+}
+$$('#svcTabs button').forEach(b=>b.onclick=()=>{$$('#svcTabs button').forEach(x=>x.classList.toggle('on',x===b));showSvc(b.textContent)});
+showSvc('IaaS');
+
+/* EC2 steps */
+const ec2=[['Open the EC2 console','Confirm the correct Region is selected'],['Launch instance','Name it server1'],['Choose an AMI','Ubuntu. The AMI defines the OS and initial root disk'],['Instance type','Small general-purpose, e.g. t3.micro'],['Key pair','Create one; store the private key securely'],['Networking','Default VPC and subnet; auto-assign public IP'],['Security group','Allow SSH (TCP 22)'],['Storage','Root volume: gp3, 8 GB'],['User data','Startup script that runs once as root at first boot (install Apache, start web server…)'],['Launch','Wait until the state is Running']];
+$('#ec2Steps').innerHTML=ec2.map(([t,s])=>`<div class="step"><div><b>${t}</b><small>${s}</small></div></div>`).join('');
+function ec2Prog(){const d=$$('#ec2Steps .step.done').length;$('#ec2Prog').textContent=d===ec2.length?'🚀 Instance is Running!':`${d} / ${ec2.length} steps complete`;$('#ec2Prog').classList.toggle('bad',false)}
+$$('#ec2Steps .step').forEach(s=>s.onclick=()=>{s.classList.toggle('done');ec2Prog()});ec2Prog();
+
+/* terminal */
+const script=[
+ ['cd Downloads',''],
+ ['chmod 400 my-key.pem','  (Linux / macOS / Git Bash / WSL)'],
+ ['ssh -i my-key.pem ubuntu@<public-ip>','Welcome to Ubuntu…'],
+ ['whoami','ubuntu'],['pwd','/home/ubuntu'],['ls',''],
+ ['# new terminal on your local machine',''],
+ ['echo "Hello from local machine" > testfile.txt',''],
+ ['scp -i my-key.pem testfile.txt ubuntu@<public-ip>:/home/ubuntu/','testfile.txt   100%'],
+ ['cat testfile.txt','Hello from local machine']
+];
+let termRun=0;
+async function runTerm(){
+  const id=++termRun,t=$('#term');t.innerHTML='';
+  for(const [cmd,out] of script){
+    if(id!==termRun)return;
+    const line=document.createElement('div');line.innerHTML='<span class="p">$ </span><span></span><span class="cur"></span>';t.appendChild(line);
+    const sp=line.children[1];
+    for(const ch of cmd){if(id!==termRun)return;sp.textContent+=ch;await new Promise(r=>setTimeout(r,reduce?0:22))}
+    line.querySelector('.cur').remove();
+    if(out){const o=document.createElement('div');o.textContent=out;o.style.opacity=.8;t.appendChild(o)}
+    await new Promise(r=>setTimeout(r,reduce?0:350));
+  }
+}
+$('#runTerm').onclick=runTerm;
+new IntersectionObserver((es,o)=>{if(es[0].isIntersecting){runTerm();o.disconnect()}},{threshold:.3}).observe($('#term'));
+
+/* careers */
+const roles=[
+ ['Dev','Cloud Developer','Builds cloud-based apps on AWS, Azure or GCP.'],['Dev','Cloud Architect','Designs scalable, secure cloud systems.'],['Dev','Cloud-Native Engineer','Containers (Docker, Kubernetes) and serverless.'],['Dev','MLOps Engineer','Deploys and manages ML models in the cloud.'],['Dev','DataOps Engineer','Cloud data pipelines and analytics.'],
+ ['Ops','DevOps Engineer','Automates deployment and infrastructure (CI/CD, IaC).'],['Ops','CloudOps Engineer','Maintains cloud systems and monitors performance.'],['Ops','Cloud Security Specialist','Protects systems and ensures compliance.'],['Ops','DevSecOps Engineer','Integrates security into pipelines.'],['Ops','FinOps Specialist','Optimizes cloud costs.'],['Ops','GitOps Engineer','Automation driven by Git.'],['Ops','Site Reliability Engineer','Reliability and performance.'],
+ ['Entry','Cloud Engineer','Cloud infrastructure and deployment.'],['Entry','Systems Administrator','Servers, OS and cloud systems.'],['Entry','DevOps Associate','Helps build pipelines and deploy apps.'],
+ ['Business','Cloud Product Manager','Defines cloud product strategy.'],['Business','Cloud Consultant','Advises companies on cloud adoption.'],['Business','Cloud Sales Engineer','Helps customers choose solutions.'],
+ ['GRC','Cloud Compliance Analyst','Ensures policy and regulation compliance.'],['GRC','Cloud Governance Specialist','Governance of cloud environments.']
+];
+const rt=['All','Dev','Ops','Entry','Business','GRC'];
+$('#roleTabs').innerHTML=rt.map((r,i)=>`<button class="${i?'':'on'}">${r}</button>`).join('');
+$('#roleGrid').innerHTML=roles.map(r=>`<div class="card role rv" data-t="${r[0]}"><span class="pill">${r[0]}</span><h3>${r[1]}</h3><p>${r[2]}</p></div>`).join('');
+$$('#roleTabs button').forEach(b=>b.onclick=()=>{$$('#roleTabs button').forEach(x=>x.classList.toggle('on',x===b));$$('.role').forEach(r=>{const h=b.textContent!=='All'&&r.dataset.t!==b.textContent;r.classList.toggle('hide',h);r.classList.add('in')})});
+observe();
+
+/* quiz */
+const qs=[
+ ['Why do many startups prefer cloud over traditional on-premise infrastructure?',['Cloud guarantees zero downtime','Cloud removes the need for system administrators','Cloud allows quick scaling without large upfront investment','Cloud provides free unlimited resources'],2,'Cloud avoids big upfront spend and scales quickly.'],
+ ['Which cost model is primarily reduced when moving from on-premise to cloud?',['Operational Expenditure (OPEX)','Capital Expenditure (CAPEX)','Variable cost','Network cost'],1,'Cloud converts CAPEX into OPEX.'],
+ ['Which deployment model suits keeping sensitive data on-premise but using cloud for scalability?',['Public Cloud','Private Cloud','Hybrid Cloud','Community Cloud'],2,'Hybrid combines private and public.'],
+ ['Which statement best describes Region vs Availability Zone?',['A Region is a single data center, and an AZ is a group of regions','A Region contains multiple AZs, and each AZ consists of one or more data centers','An AZ is a virtual concept with no physical infrastructure','They are the same thing'],1,'Data centers → AZs → Regions.'],
+ ['In which service model does the customer have the MOST control over OS and applications?',['SaaS','PaaS','IaaS','Edge Computing'],2,'IaaS: you manage the OS, runtime and apps.']
+];
+let score=0,answered=0;
+$('#quizBox').innerHTML=qs.map((q,i)=>`<div class="card rv" data-q="${i}"><b>Q${i+1}. ${q[0]}</b>${q[1].map((o,j)=>`<button class="opt" data-j="${j}">${'ABCD'[j]}. ${o}</button>`).join('')}<div class="exp"></div></div>`).join('');
+$$('[data-q]').forEach(c=>{const q=qs[+c.dataset.q];$$('.opt',c).forEach(b=>b.onclick=()=>{
+  if(c.dataset.done)return;c.dataset.done=1;answered++;const j=+b.dataset.j;
+  if(j===q[2]){score++;b.classList.add('right')}else{b.classList.add('wrong');$$('.opt',c)[q[2]].classList.add('right')}
+  const e=$('.exp',c);e.textContent=q[3];e.classList.add('show');
+  $('#score').textContent=`Score: ${score} / ${qs.length}${answered===qs.length?(score===qs.length?'  🎉 Perfect!':'  Review the sections above and retry.'):''}`;
+})});
+$('#score').textContent=`Score: 0 / ${qs.length}`;
+observe();
+</script>
+</body>
+</html>
